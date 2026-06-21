@@ -1,32 +1,65 @@
 const express = require('express');
 const cors = require('cors');
-const app = express();
+const axios = require('axios');
 
-app.use(cors());
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// CORS configuration allowing all connections
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type']
+}));
+
 app.use(express.json());
 
-// UPGRADED: This formula now perfectly extracts IDs from regular videos, shorts, and mobile links!
-const getYoutubeId = (url) => {
-    const regExp = /^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]*).*/;
-    const match = url.match(regExp);
-    return (match && match[1].length === 11) ? match[1] : null;
-};
+// Main endpoint to extract thumbnail URLs
+app.post('/api/thumbnail', (req, res) => {
+    const { videoUrl } = req.body;
 
-app.get('/get-thumbnail', (req, res) => {
-    const videoUrl = req.query.url;
-    const videoId = getYoutubeId(videoUrl);
+    if (!videoUrl) {
+        return res.status(400).json({ error: 'YouTube URL is required' });
+    }
 
-    if (videoId) {
-        res.json({
-            success: true,
-            maxres: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`, 
-            hq: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,         
-            mq: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,         
-            sd: `https://img.youtube.com/vi/${videoId}/sddefault.jpg`          
-        });
-    } else {
-        res.status(400).json({ success: false, message: "Invalid YouTube URL specified." });
+    try {
+        let videoId = '';
+        
+        if (videoUrl.includes('youtu.be/')) {
+            videoId = videoUrl.split('youtu.be/')[1].split(/[?#]/)[0];
+        } else if (videoUrl.includes('youtube.com/watch')) {
+            const urlParams = new URLSearchParams(new URL(videoUrl).search);
+            videoId = urlParams.get('v');
+        } else if (videoUrl.includes('youtube.com/embed/')) {
+            videoId = videoUrl.split('youtube.com/embed/')[1].split(/[?#]/)[0];
+        } else if (videoUrl.includes('youtube.com/shorts/')) {
+            videoId = videoUrl.split('youtube.com/shorts/')[1].split(/[?#]/)[0];
+        }
+
+        if (!videoId) {
+            return res.status(400).json({ error: 'Could not extract valid YouTube Video ID' });
+        }
+
+        const thumbnails = {
+            maxres: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
+            sd: `https://img.youtube.com/vi/${videoId}/sddefault.jpg`,
+            hq: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+            mq: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
+            default: `https://img.youtube.com/vi/${videoId}/default.jpg`
+        };
+
+        return res.json({ videoId, thumbnails });
+
+    } catch (error) {
+        return res.status(500).json({ error: 'Internal server error processing URL' });
     }
 });
 
-app.listen(5000, () => console.log("Server running on port 5000"));
+// Simple root check endpoint
+app.get('/', (req, res) => {
+    res.send('YouTube Thumbnail Downloader Backend is Running Live!');
+});
+
+app.listen(PORT, () => {
+    console.log(`Server is running smoothly on port ${PORT}`);
+});
