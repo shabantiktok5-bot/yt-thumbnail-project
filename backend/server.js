@@ -1,11 +1,10 @@
 const express = require('express');
 const cors = require('cors');
-const axios = require('axios');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// CORS configuration allowing all connections
+// Open CORS so your live Netlify site can talk to this server
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST'],
@@ -14,9 +13,9 @@ app.use(cors({
 
 app.use(express.json());
 
-// Main endpoint to extract thumbnail URLs
-app.post('/api/thumbnail', (req, res) => {
-    const { videoUrl } = req.body;
+// Match your exact original frontend endpoint name and logic
+app.get('/get-thumbnail', (req, res) => {
+    const videoUrl = req.query.url;
 
     if (!videoUrl) {
         return res.status(400).json({ error: 'YouTube URL is required' });
@@ -40,6 +39,7 @@ app.post('/api/thumbnail', (req, res) => {
             return res.status(400).json({ error: 'Could not extract valid YouTube Video ID' });
         }
 
+        // Send back the thumbnails mapping your original code needs
         const thumbnails = {
             maxres: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
             sd: `https://img.youtube.com/vi/${videoId}/sddefault.jpg`,
@@ -55,7 +55,7 @@ app.post('/api/thumbnail', (req, res) => {
     }
 });
 
-// Simple root check endpoint
+// Root route health check
 app.get('/', (req, res) => {
     res.send('YouTube Thumbnail Downloader Backend is Running Live!');
 });
