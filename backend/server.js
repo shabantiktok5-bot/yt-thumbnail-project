@@ -24,7 +24,7 @@ app.get('/get-thumbnail', (req, res) => {
     try {
         let videoId = '';
         
-        // Exact YouTube URL parsing regex structures
+        // Exact YouTube URL parsing structures
         if (videoUrl.includes('youtu.be/')) {
             videoId = videoUrl.split('youtu.be/')[1].split(/[?#]/)[0];
         } else if (videoUrl.includes('youtube.com/watch')) {
@@ -40,16 +40,13 @@ app.get('/get-thumbnail', (req, res) => {
             return res.status(400).json({ error: 'Could not extract valid YouTube Video ID' });
         }
 
-        // Return properties wrapped inside a main object structure matching your original UI
+        // Return a flat structure matching what your response.data sets
         return res.json({
-            videoId: videoId,
-            thumbnails: {
-                maxres: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
-                sd: `https://img.youtube.com/vi/${videoId}/sddefault.jpg`,
-                hq: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
-                mq: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
-                default: `https://img.youtube.com/vi/${videoId}/default.jpg`
-            }
+            maxres: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
+            sd: `https://img.youtube.com/vi/${videoId}/sddefault.jpg`,
+            hq: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+            mq: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
+            default: `https://img.youtube.com/vi/${videoId}/default.jpg`
         });
 
     } catch (error) {
