@@ -4,7 +4,7 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Open CORS so your live Netlify site can talk to this server
+// Open CORS so your live Netlify site can talk to this server smoothly
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST'],
@@ -13,7 +13,7 @@ app.use(cors({
 
 app.use(express.json());
 
-// Match your exact original frontend endpoint name and logic
+// Main endpoint matching your exact original frontend layout structure
 app.get('/get-thumbnail', (req, res) => {
     const videoUrl = req.query.url;
 
@@ -24,6 +24,7 @@ app.get('/get-thumbnail', (req, res) => {
     try {
         let videoId = '';
         
+        // Exact YouTube URL parsing regex structures
         if (videoUrl.includes('youtu.be/')) {
             videoId = videoUrl.split('youtu.be/')[1].split(/[?#]/)[0];
         } else if (videoUrl.includes('youtube.com/watch')) {
@@ -39,23 +40,24 @@ app.get('/get-thumbnail', (req, res) => {
             return res.status(400).json({ error: 'Could not extract valid YouTube Video ID' });
         }
 
-        // Send back the thumbnails mapping your original code needs
-        const thumbnails = {
-            maxres: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
-            sd: `https://img.youtube.com/vi/${videoId}/sddefault.jpg`,
-            hq: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
-            mq: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
-            default: `https://img.youtube.com/vi/${videoId}/default.jpg`
-        };
-
-        return res.json({ videoId, thumbnails });
+        // Return properties wrapped inside a main object structure matching your original UI
+        return res.json({
+            videoId: videoId,
+            thumbnails: {
+                maxres: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
+                sd: `https://img.youtube.com/vi/${videoId}/sddefault.jpg`,
+                hq: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+                mq: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
+                default: `https://img.youtube.com/vi/${videoId}/default.jpg`
+            }
+        });
 
     } catch (error) {
         return res.status(500).json({ error: 'Internal server error processing URL' });
     }
 });
 
-// Root route health check
+// Root check endpoint
 app.get('/', (req, res) => {
     res.send('YouTube Thumbnail Downloader Backend is Running Live!');
 });
