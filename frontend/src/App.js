@@ -33,7 +33,7 @@ function App() {
 
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:5000/get-thumbnail?url=${encodeURIComponent(videoUrl)}`);
+      const response = await axios.get(`https://yt-thumbnail-backend-hhej.onrender.com/get-thumbnail?url=${encodeURIComponent(videoUrl)}`);
       if (response.data.success) {
         setThumbnails(response.data);
       } else {
