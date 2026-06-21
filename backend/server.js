@@ -4,7 +4,7 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Open CORS so your live Netlify site can talk to this server smoothly
+// Completely open up CORS so Netlify's domain security allows the fetch
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST'],
@@ -13,7 +13,7 @@ app.use(cors({
 
 app.use(express.json());
 
-// Main endpoint matching your exact original frontend layout structure
+// Flat-object API endpoint mapping cleanly to response.data queries
 app.get('/get-thumbnail', (req, res) => {
     const videoUrl = req.query.url;
 
@@ -24,7 +24,6 @@ app.get('/get-thumbnail', (req, res) => {
     try {
         let videoId = '';
         
-        // Exact YouTube URL parsing structures
         if (videoUrl.includes('youtu.be/')) {
             videoId = videoUrl.split('youtu.be/')[1].split(/[?#]/)[0];
         } else if (videoUrl.includes('youtube.com/watch')) {
@@ -40,7 +39,7 @@ app.get('/get-thumbnail', (req, res) => {
             return res.status(400).json({ error: 'Could not extract valid YouTube Video ID' });
         }
 
-        // Return a flat structure matching what your response.data sets
+        // Return flat links matching what frontend response.data saves directly
         return res.json({
             maxres: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
             sd: `https://img.youtube.com/vi/${videoId}/sddefault.jpg`,
@@ -54,7 +53,7 @@ app.get('/get-thumbnail', (req, res) => {
     }
 });
 
-// Root check endpoint
+// App environment sanity root check
 app.get('/', (req, res) => {
     res.send('YouTube Thumbnail Downloader Backend is Running Live!');
 });
